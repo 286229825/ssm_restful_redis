@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="mapper.UserMapper">
+
+	<!-- 开启使用redis作为mybatis的二级缓存，type的值为实现了Cache接口的自定义缓存类 -->
+	<cache type="redis.RedisCache"></cache>
+
+	<sql id="query_where">
+		<if test="id != null">
+			and id like CONCAT('%',#{id},'%')
+		</if>
+		<if test="name != null">
+			and name like CONCAT('%',#{name},'%')
+		</if>
+		<if test="age != null">
+			and age like CONCAT('%',#{age},'%')
+		</if>
+		<if test="sex != null">
+			and sex like CONCAT('%',#{sex},'%')
+		</if>
+		<if test="job != null">
+			and job like CONCAT('%',#{job},'%')
+		</if>
+		<if test="birthday != null">
+			and birthday like CONCAT('%',#{birthday},'%')
+		</if>
+		<if test="authorityId != null">
+			and authority_id like CONCAT('%',#{authorityId},'%')
+		</if>
+	</sql>
+
+	<insert id="insertOne" parameterType="User">
+		INSERT INTO user(
+			id,
+			name,
+			age,
+			sex,
+			job,
+			birthday,
+			authority_id		) VALUES (
+			#{id},
+			#{name},
+			#{age},
+			#{sex},
+			#{job},
+			#{birthday},
+			#{authorityId}		)
+	</insert>
+
+	<insert id="insertBatch" parameterType="List">
+		INSERT INTO user(
+			id,
+			name,
+			age,
+			sex,
+			job,
+			birthday,
+			authority_id		) VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+			#{item.id},
+			
+			#{item.name},
+			
+			#{item.age},
+			
+			#{item.sex},
+			
+			#{item.job},
+			
+			#{item.birthday},
+			
+			#{item.authorityId})
+		</foreach>
+	</insert>
+
+	<delete id="deleteOne" parameterType="int">
+		DELETE FROM user
+		WHERE
+		id=#{id}
+	</delete>
+
+	<delete id="deleteBatch" parameterType="List">
+		DELETE FROM user
+		WHERE id IN
+		<foreach collection="list" item="item" open="(" close=")"
+			separator=",">
+			#{item}
+		</foreach>
+	</delete>
+
+	<update id="updateOne" parameterType="User">
+		UPDATE user
+		<set>
+			id = #{id},
+			name = #{name},
+			age = #{age},
+			sex = #{sex},
+			job = #{job},
+			birthday = #{birthday},
+			authority_id = #{authorityId}		</set>
+		WHERE id=#{id}
+	</update>
+
+	<update id="updateBatch" parameterType="List">
+		<foreach collection="list" item="item" open="" close="" separator=";">
+		UPDATE user
+		<set>
+			id = #{item.id},
+			name = #{item.name},
+			age = #{item.age},
+			sex = #{item.sex},
+			job = #{item.job},
+			birthday = #{item.birthday},
+			authority_id = #{item.authorityId}		</set>
+		WHERE id=#{item.id}
+		</foreach>
+	</update>
+
+	<select id="selectByCondition" parameterType="User" resultType="User">
+		SELECT * FROM user
+		<where>
+			<include refid="query_where"></include>
+		</where>
+	</select>
+	
+	<select id="selectById" parameterType="int" resultType="User">
+		SELECT * FROM user
+		where id=#{id}
+	</select>
+
+	<select id="selectByPage" parameterType="User" resultType="User">
+		SELECT * FROM user
+		<where>
+			<include refid="query_where"></include>
+		</where>
+		<if test="#{startRow} != null and #{rows} != null">
+			LIMIT #{startRow},#{rows}
+		</if>
+	</select>
+
+</mapper>
